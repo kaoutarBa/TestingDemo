@@ -9,9 +9,17 @@
             var mockRepository = new Mock<IUserRepository>();
             var expectedUsers = new List<User>
             {
+<<<<<<< Updated upstream
                 new User { Id = 1, FirstName = "ANA", LastName = "AYA", VerifiedEmail = true, Phone = "1234567890" },
                 new User { Id = 2, FirstName = "MAX", LastName = "IN", VerifiedEmail = false, Phone = "9876543210" }
             };
+=======
+                FirstName = "ANA",
+                LastName = "AYAA",
+                Phone = "+33000001"
+            }
+            );
+>>>>>>> Stashed changes
 
             mockRepository.Setup(repo => repo.GetAllUsers()).Returns(expectedUsers);
 
@@ -77,4 +85,32 @@
             mockRepository.Verify(repo => repo.VerifyEmail(userId), Times.Once);
         }
     }
+<<<<<<< Updated upstream
 }
+=======
+
+    [Fact]
+    public void Update_UpdateMobileNumber()
+    {
+        // Arrange
+        var userManagement = new UserManagement();
+
+        // Act
+        userManagement.AddUser(
+            new UserDTO()
+            {
+                FirstName = "ANA",
+                LastName = "ANA",
+                Phone = "+33000003"
+            }
+            );
+
+        var firstUser = userManagement.GetAllUsers().ToList().First();
+        userManagement.UpdatePhone(firstUser.Id, "+33000004");
+
+        // Assert
+        var savedUser = Assert.Single(userManagement.GetAllUsers());
+        Assert.Equal("+33000005", savedUser.Phone);
+    }
+}
+>>>>>>> Stashed changes
