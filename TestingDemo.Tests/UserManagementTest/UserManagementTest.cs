@@ -1,80 +1,80 @@
-﻿namespace TestingDemo.Tests.UserManagementTest;
-
-public class UserManagementTest
+﻿namespace TestingDemo.Tests
 {
-    [Fact]
-    public void Add_CreateUser()
+    public class UserManagementTests
     {
-        // Arrange
-        var userManagement = new UserManagement();
-
-        // Act
-        userManagement.AddUser(
-            new UserDTO()
+        [Fact]
+        public void GetAllUsers_ReturnsAllUsers()
+        {
+            // Arrange
+            var mockRepository = new Mock<IUserRepository>();
+            var expectedUsers = new List<User>
             {
-                FirstName = "ANA",
-                LastName = "AYA",
-                Phone = "+33000001"
-            }
-            );
+                new User { Id = 1, FirstName = "ANA", LastName = "AYA", VerifiedEmail = true, Phone = "1234567890" },
+                new User { Id = 2, FirstName = "MAX", LastName = "IN", VerifiedEmail = false, Phone = "9876543210" }
+            };
 
-        // Assert
-        var savedUser = Assert.Single(userManagement.GetAllUsers());
-        Assert.NotNull(savedUser);
-        Assert.Equal("ANA", savedUser.FirstName);
-        Assert.Equal("AYA", savedUser.LastName);
-        Assert.Equal("+33000001", savedUser.Phone);
-        Assert.NotEmpty(savedUser.Phone);
-        Assert.False(savedUser.VerifiedEmail);
-    }
+            mockRepository.Setup(repo => repo.GetAllUsers()).Returns(expectedUsers);
 
-    [Fact]
-    public void Verify_VerifyEmailAddress()
-    {
-        // Arrange
-        var userManagement = new UserManagement();
+            var userManagement = new UserManagement(mockRepository.Object);
 
-        // Act
-        userManagement.AddUser(
-            new UserDTO()
+            // Act
+            var result = userManagement.GetAllUsers();
+
+            // Assert
+            Assert.Equal(expectedUsers, result);
+        }
+
+        [Fact]
+        public void AddUser_NewUser_AddsToRepository()
+        {
+            // Arrange
+            var mockRepository = new Mock<IUserRepository>();
+            var userManagement = new UserManagement(mockRepository.Object);
+
+            var newUserDto = new UserDTO
             {
-                FirstName = "ANA",
-                LastName = "ANA",
-                Phone = "+33000001"
-            }
-            );
+                FirstName = "Alice",
+                LastName = "Wonderland",
+                VerifiedEmail = false,
+                Phone = "5555555555"
+            };
 
-        var firstUser = userManagement.GetAllUsers().ToList().First();
-        userManagement.VerifyEmail(firstUser.Id);
+            // Act
+            userManagement.AddUser(newUserDto);
 
-        // Assert
-        var savedUser = Assert.Single(userManagement.GetAllUsers());
-        Assert.True(savedUser.VerifiedEmail);
+            // Assert
+            mockRepository.Verify(repo => repo.AddUser(It.IsAny<UserDTO>()), Times.Once);
+        }
 
-        //Assert.False(savedUser.VerifiedEmail);
-    }
+        [Fact]
+        public void UpdatePhone_ExistingUser_UpdatesPhone()
+        {
+            // Arrange
+            int userId = 1;
+            string newPhone = "9999999999";
+            var mockRepository = new Mock<IUserRepository>();
+            var userManagement = new UserManagement(mockRepository.Object);
 
-    [Fact]
-    public void Update_UpdateMobileNumber()
-    {
-        // Arrange
-        var userManagement = new UserManagement();
+            // Act
+            userManagement.UpdatePhone(userId, newPhone);
 
-        // Act
-        userManagement.AddUser(
-            new UserDTO()
-            {
-                FirstName = "ANA",
-                LastName = "ANA",
-                Phone = "+33000003"
-            }
-            );
+            // Assert
+            mockRepository.Verify(repo => repo.UpdatePhone(userId, newPhone), Times.Once);
+        }
 
-        var firstUser = userManagement.GetAllUsers().ToList().First();
-        userManagement.UpdatePhone(firstUser.Id, "+33000004");
+        [Fact]
+        public void VerifyEmail_ExistingUser_VerifiesEmail()
+        {
+            // Arrange
+            int userId = 1;
+            var mockRepository = new Mock<IUserRepository>();
+            var userManagement = new UserManagement(mockRepository.Object);
 
-        // Assert
-        var savedUser = Assert.Single(userManagement.GetAllUsers());
-        Assert.Equal("+33000004", savedUser.Phone);
+            // Act
+            userManagement.VerifyEmail(userId);
+
+            // Assert
+            mockRepository.Verify(repo => repo.VerifyEmail(userId), Times.Once);
+        }
     }
 }

@@ -1,54 +1,42 @@
-﻿namespace TestingDemo.Implementations;
-
-
-public class UserManagement : IUserManagement
+﻿namespace TestingDemo.Implementations
 {
-    private readonly List<User> _users = new List<User>();
-
-    private int _idCounter = 1;
-
-    public IEnumerable<User> GetAllUsers()
+    public class UserManagement : IUserManagement
     {
-        return _users;
-    }
+        private readonly IUserRepository _userRepository;
+        private readonly List<User> _users = new List<User>();
+        private int _idCounter = 1;
 
-    public void AddUser(UserDTO newUserDto)
-    {
-        User newUser = new()
+        public UserManagement(IUserRepository userRepository)
         {
-            Id = _idCounter++,
-            FirstName = newUserDto.FirstName,
-            LastName = newUserDto.LastName,
-            VerifiedEmail = newUserDto.VerifiedEmail,
-            Phone = newUserDto.Phone,
-        };
-        _users.Add(newUser);
-    }
-    public void UpdatePhone(int userId, string newPhone)
-    {
-        var userToUpdate = _users.FirstOrDefault(u => u.Id == userId);
-
-        if (userToUpdate != null)
-        {
-            userToUpdate.Phone = newPhone;
+            _userRepository = userRepository;
         }
-        else
-        {
-            Console.WriteLine($"Utilisateur avec l'ID {userId} non trouvé.");
-        }
-    }
 
-    public void VerifyEmail(int userId)
-    {
-        var userToVerify = _users.FirstOrDefault(u => u.Id == userId);
-
-        if (userToVerify != null)
+        public IEnumerable<User> GetAllUsers()
         {
-            userToVerify.VerifiedEmail = true;
+            return _userRepository.GetAllUsers();
         }
-        else
+
+        public void AddUser(UserDTO newUserDto)
         {
-            Console.WriteLine($"Utilisateur avec l'ID {userId} non trouvé.");
+            User newUser = new()
+            {
+                Id = _idCounter++,
+                FirstName = newUserDto.FirstName,
+                LastName = newUserDto.LastName,
+                VerifiedEmail = newUserDto.VerifiedEmail,
+                Phone = newUserDto.Phone,
+            };
+            _userRepository.AddUser(newUserDto); // Using the repository to add user
+        }
+
+        public void UpdatePhone(int userId, string newPhone)
+        {
+            _userRepository.UpdatePhone(userId, newPhone); // Using the repository to update phone
+        }
+
+        public void VerifyEmail(int userId)
+        {
+            _userRepository.VerifyEmail(userId); // Using the repository to verify email
         }
     }
 }
